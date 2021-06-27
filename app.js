@@ -1,6 +1,30 @@
 const express = require('express');
+const mongoose = require('mongoose');
 
 const app = express();
+const schema = mongoose.Schema;
+
+// Set up default mongoose connection
+var mongoDB = 'mongodb://localhost:27017/test_db_1';
+mongoose.connect(
+	mongoDB,
+	{useNewUrlParser: true, useUnifiedTopology: true},
+	() => console.log('Connected to MongoDB')
+);
+
+// Initialise schema
+const FeatureAccessSchema = new schema({
+	emailAddress: String,
+	enabledFeatures:[String]
+});
+
+const FeatureAccessModel = mongoose.model("FeatureAccess", FeatureAccessSchema);
+
+// Get the default connection
+var db = mongoose.connection;
+
+// Bind connection to error event (to get notification of connection errors)
+db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // Middlewares
 app.use('/post', (req,res) => {
@@ -10,22 +34,6 @@ app.use('/post', (req,res) => {
 // Routes
 app.get('/', (req,res) => {
 	res.send('Home');
-});
-
-app.get('/post', (req,res) => {
-	res.send('Post');
-});
-
-app.get('/get', (req,res) => {
-	res.send('Get');
-});
-
-app.get('/put', (req,res) => {
-	res.send('Put');
-});
-
-app.get('/delete', (req,res) => {
-	res.send('Delete');
 });
 
 app.listen(3000);
