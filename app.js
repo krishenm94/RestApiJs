@@ -32,12 +32,15 @@ app.use(express.json());
 
 // Routes
 // TODO: Complete req params format
-app.get('/feature/:email&featureName', (req,res) => {
+app.get('/feature/:email&:featureName', (req,res) => {
        try{
 	       const email = req.params.email;
 	       const featureName = req.params.featureName;
 	       //TODO: Complete find by email and feature name
-	       const feature = await FeatureAccessModel.find(...);
+	       const feature = await FeatureAccessModel.find(
+			f => (f.email === email && f.featureName === featureName)
+	       );
+	       if(!feature) res.status(404).send("Entry not found");
 	       res.status(200).json({enable: feature.enable});
        } catch (e){
 	       res.status(200).json({enable: false});
@@ -48,7 +51,7 @@ app.get('/feature/:email&featureName', (req,res) => {
 app.post("/feature", async (req,res) => {
 	try{
 		const feature = await FeatureAccessModel.create(req.body)
-		res.status(200).json({feature});
+		res.status(200).json({});
 		console.log("Post successful");
 	} catch (e){
 		res.status(304);
