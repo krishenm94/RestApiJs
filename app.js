@@ -9,13 +9,14 @@ var mongoDB = 'mongodb://localhost:27017/test_db_1';
 mongoose.connect(
 	mongoDB,
 	{useNewUrlParser: true, useUnifiedTopology: true},
-	() => console.log('Connected to MongoDB')
+	() => console.log('Connected to MongoDB instance')
 );
 
 // Initialise schema
 const FeatureAccessSchema = new schema({
-	emailAddress: String,
-	enabledFeatures:[String]
+	email: String,
+	featureName:String,
+	enable: Boolean
 });
 
 const FeatureAccessModel = mongoose.model("FeatureAccess", FeatureAccessSchema);
@@ -27,13 +28,33 @@ var db = mongoose.connection;
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 
 // Middlewares
-app.use('/post', (req,res) => {
-	console.log('Post endpoint hit');
-});
+app.use(express.json());
 
 // Routes
-app.get('/', (req,res) => {
-	res.send('Home');
+// TODO: Complete req params format
+app.get('/feature/:email&featureName', (req,res) => {
+       try{
+	       const email = req.params.email;
+	       const featureName = req.params.featureName;
+	       //TODO: Complete find by email and feature name
+	       const feature = await FeatureAccessModel.find(...);
+	       res.status(200).json({enable: feature.enable});
+       } catch (e){
+	       res.status(200).json({enable: false});
+       }
+
+});
+
+app.post("/feature", async (req,res) => {
+	try{
+		const feature = await FeatureAccessModel.create(req.body)
+		res.status(200).json({feature});
+		console.log("Post successful");
+	} catch (e){
+		res.status(304);
+		console.log("Failed to post");
+		return e;
+	}
 });
 
 app.listen(3000);
