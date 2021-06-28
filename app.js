@@ -31,26 +31,33 @@ db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 app.use(express.json());
 
 // Routes
-// TODO: Complete req params format
 app.get('/feature/:email&:featureName', (req,res) => {
        try{
-	       const email = req.params.email;
-	       const featureName = req.params.featureName;
-	       //TODO: Complete find by email and feature name
-	       const feature = await FeatureAccessModel.find(
-			f => (f.email === email && f.featureName === featureName)
+	       const _email = req.params.email;
+	       const _featureName = req.params.featureName;
+	       const feature = FeatureAccessModel.find(
+		       { email: _email, featureName: _featureName}
 	       );
 	       if(!feature) res.status(404).send("Entry not found");
-	       res.status(200).json({enable: feature.enable});
+	       res.status(200).json({canAccess: feature.enable});
        } catch (e){
-	       res.status(200).json({enable: false});
+	       res.status(404).send(e);
        }
 
 });
 
 app.post("/feature", async (req,res) => {
 	try{
-		const feature = await FeatureAccessModel.create(req.body)
+
+	        feature = FeatureAccessModel.find(
+		       { email: req.body.email, featureName: req.body.featureName}
+	        );
+	        if(feature) {
+			console.log("Entry already exists. Failed to post");
+			res.status(304).json({feature}).send("Entry already exists");
+			return;
+		}
+		feature = FeatureAccessModel.create(req.body)
 		res.status(200).json({});
 		console.log("Post successful");
 	} catch (e){
